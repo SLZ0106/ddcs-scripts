@@ -1,5 +1,7 @@
 from nltk.corpus import wordnet as wn
+from pprint import pprint
 from scipy.signal import convolve2d
+from random import choice
 import numpy as np
 import unittest
 
@@ -96,11 +98,35 @@ def k_means_e_step(xs):
 def k_means_m_step(x, y):
     return euclidean_distance(x, y)
 
-def k_means_step():
-    pass
+def k_means(xs, k, labels = None):
+    if labels is None:
+        labels = [choice(range(k)) for _ in xs]
+    clusters = {i: [] for i in range(k)}
+    print(clusters)
+    for i, label in enumerate(labels):
+        clusters[label].append(xs[i])
+    print(clusters)
+    centroids = []
+    # E-Step
+    for label, group in clusters.items():
+        centroid = k_means_e_step(group)
+        centroids.append({"label": label, "value": centroid})
+    # M-Step
+    results = []
+    for x in xs:
+        distances = []
+        for centroid in centroids:
+            distance = k_means_m_step(x, centroid["value"])
+            distances.append({"label": centroid["label"], "centroid": centroid["value"], "x": x, "distance": distance**2})
+        new_label = min(distances, key=lambda x: x["distance"])["label"]
+        print(new_label)
+        results.append(
+            {"label": new_label, "x": x}
+        )
+    return results
+       
 
-def k_means(x, k):
-    pass
+
 class Tests(unittest.TestCase):
     """
     def test_stats(self):
@@ -161,7 +187,7 @@ class Tests(unittest.TestCase):
         expected_eigenvalues = np.array([14.47722755, -0.87333474,  1.64610719]).tolist()
         for i, eigVal in enumerate(eigVals):
             self.assertAlmostEqual(eigVal, expected_eigenvalues[i], places=2)
-    """
+    
     def test_k_means_e_step(self):
         xs = np.array([
             [-3.4, -1.2],
@@ -177,7 +203,18 @@ class Tests(unittest.TestCase):
         x = np.array([-2.1, -3.2])
         y = np.array([0.133, 0.3])
         self.assertAlmostEqual(euclidean_distance(x, y), 4.15, places = 2)
-
+    """
 
 if __name__ == "__main__":
-    unittest.main()
+    #unittest.main()
+    xs = np.array([
+        [-2.1, -3.2],
+        [-3.4, -1.2],
+        [-2.6, -2.7],
+        [3.2, 2.1],
+        [1.2, 3.6],
+        [0.6, 0]
+    ])
+    labels = np.array([1, 0, 1, 0, 1, 0])
+    k = 2
+    pprint(k_means(xs, k, labels))
