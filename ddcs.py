@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet as wn
+from scipy.signal import convolve2d
 import numpy as np
 import unittest
 
@@ -55,8 +56,37 @@ def hamming_distance(x, y):
 def wup_relatedness():
     print(f"go here http://ws4jdemo.appspot.com/")
 
-class W1Tests(unittest.TestCase):
-    """
+def covar_mat_eig(a):
+    eig_vals, eig_vecs = np.linalg.eig(a)
+    print(f"Eigenvalues: {eig_vals}")
+    print(f"Eigenvectors: {eig_vecs}")
+    return eig_vals, eig_vecs
+
+
+def linear_regression(x, y):
+    # create matrix
+    matrix_x = np.empty((len(x), 2))
+    matrix_y = np.empty((len(y), 1))
+    # add a column of 1s in x matrix
+    for i in range(0, len(x)):
+        matrix_x[i][0] = 1
+        matrix_x[i][1] = x[i]
+        matrix_y[i][0] = y[i]
+    # use formula
+    result = np.matrix(matrix_x.T @ matrix_x).I @ matrix_x.T @ matrix_y
+    print('fit_Wh: ')
+    print(result)
+    print('Equation: y = {} + {} x'.format(result[0, 0], result[1, 0]))
+    return result[0, 0], result[1, 0]
+
+def convolute_matrices(a, b, dimensions = 1):
+    factor = sum([abs(i) for i in np.array(a).flatten()])
+    if dimensions == 1:
+        return factor, np.convolve(a, b, mode='valid')
+    elif dimensions == 2:
+        return factor, convolve2d(a, b, mode='valid')
+
+class Tests(unittest.TestCase):
     def test_stats(self):
         mean, median, std, variance = stats([-3,2,4,6,-2,0,5])
         self.assertAlmostEqual(mean, 1.71, places=2)
@@ -82,8 +112,41 @@ class W1Tests(unittest.TestCase):
     def test_hamming_distance(self):
         self.assertEqual(hamming_distance("weather", "further"), 3)
         self.assertRaises(ValueError, hamming_distance, "weather", "further1")
-    """
 
+    def test_one_d_convolution(self):
+        a = [1, 2, 1]
+        b = [2, 2, 3, 3, 2]
+        factor, conv = (convolute_matrices(a, b))
+        self.assertEqual(factor, 4)
+        self.assertEqual(conv.tolist(), np.array([ 9, 11, 11]).tolist())
+
+    def test_two_d_convolution(self):
+        a = [
+            [-1, 0, 1], [-2, 0, 2], [-1, 0, 1]
+        ]
+        b = [
+            [0, 5, 5, 5, 0], 
+            [0, 5, 10, 5, 0],
+            [0, 10, 10, 10, 0],
+            [0, 5, 10, 5, 0],
+            [0, 5, 5, 5, 0]
+        ]
+        factor, conv = convolute_matrices(a, b, dimensions=2)
+        self.assertEqual(factor, 8)
+        self.assertEqual(conv.tolist(), np.array(
+            [[-35,   0,  35],
+            [-40,   0,  40],
+            [-35,   0,  35]]
+        ).tolist())
+    
+    def test_covariance_matrix_eig(self):
+        a = np.array([[3.5, -6, 2],[-6,8.25, -4.5],[2, -4.5, 3.5]])
+        eigVals, eigVecs = covar_mat_eig(a)
+        self.assertEqual(eigVals.tolist(), np.array([14.47722755, -0.87333474,  1.64610719]).tolist())
+        self.assertEqual(eigVecs.tolist(), np.array([
+            [-0.49421149,  0.71278785, -0.49768311], 
+            [ 0.76907314,  0.62538656,  0.13197788], 
+            [-0.40531656,  0.31752973,  0.85725921]]).tolist())
 
 if __name__ == "__main__":
     unittest.main()
