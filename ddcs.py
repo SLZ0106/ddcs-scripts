@@ -86,7 +86,23 @@ def convolute_matrices(a, b, dimensions = 1):
     elif dimensions == 2:
         return factor, convolve2d(a, b, mode='valid')
 
+def k_means_e_step(xs):
+    sum = np.zeros_like(xs[0])
+    for x in xs:
+        sum = np.add(sum, x)
+    print(f"E-Step Result: 1/{len(xs)} * {sum}")
+    return sum/len(xs)
+
+def k_means_m_step(x, y):
+    return euclidean_distance(x, y)
+
+def k_means_step():
+    pass
+
+def k_means(x, k):
+    pass
 class Tests(unittest.TestCase):
+    """
     def test_stats(self):
         mean, median, std, variance = stats([-3,2,4,6,-2,0,5])
         self.assertAlmostEqual(mean, 1.71, places=2)
@@ -112,7 +128,7 @@ class Tests(unittest.TestCase):
     def test_hamming_distance(self):
         self.assertEqual(hamming_distance("weather", "further"), 3)
         self.assertRaises(ValueError, hamming_distance, "weather", "further1")
-
+    
     def test_one_d_convolution(self):
         a = [1, 2, 1]
         b = [2, 2, 3, 3, 2]
@@ -142,11 +158,26 @@ class Tests(unittest.TestCase):
     def test_covariance_matrix_eig(self):
         a = np.array([[3.5, -6, 2],[-6,8.25, -4.5],[2, -4.5, 3.5]])
         eigVals, eigVecs = covar_mat_eig(a)
-        self.assertEqual(eigVals.tolist(), np.array([14.47722755, -0.87333474,  1.64610719]).tolist())
-        self.assertEqual(eigVecs.tolist(), np.array([
-            [-0.49421149,  0.71278785, -0.49768311], 
-            [ 0.76907314,  0.62538656,  0.13197788], 
-            [-0.40531656,  0.31752973,  0.85725921]]).tolist())
+        expected_eigenvalues = np.array([14.47722755, -0.87333474,  1.64610719]).tolist()
+        for i, eigVal in enumerate(eigVals):
+            self.assertAlmostEqual(eigVal, expected_eigenvalues[i], places=2)
+    """
+    def test_k_means_e_step(self):
+        xs = np.array([
+            [-3.4, -1.2],
+            [3.2, 2.1],
+            [0.6, 0]
+        ])
+        expected = np.array([0.133, 0.3]).tolist()
+        result = k_means_e_step(xs).tolist()
+        for i, r in enumerate(result):
+            self.assertAlmostEqual(r, expected[i], places=2)
+    
+    def test_k_means_m_step(self):
+        x = np.array([-2.1, -3.2])
+        y = np.array([0.133, 0.3])
+        self.assertAlmostEqual(euclidean_distance(x, y), 4.15, places = 2)
+
 
 if __name__ == "__main__":
     unittest.main()
