@@ -119,7 +119,6 @@ def k_means(xs, k, labels = None):
             distance = k_means_m_step(x, centroid["value"])
             distances.append({"label": centroid["label"], "centroid": centroid["value"], "x": x, "distance": distance**2})
         new_label = min(distances, key=lambda x: x["distance"])["label"]
-        print(new_label)
         results.append(
             {"label": new_label, "x": x}
         )
