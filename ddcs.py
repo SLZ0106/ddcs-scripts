@@ -1,4 +1,3 @@
-from nltk.corpus import wordnet as wn
 from pprint import pprint
 from scipy.signal import convolve2d
 from random import choice
@@ -15,22 +14,22 @@ def stats(x):
 
 def manhattan_distance(x, y):
     distance = np.sum([np.abs(a - b) for a, b in zip(x, y)])
-    print(f"Manhattan Distance: {distance}")
+    print(f"Manhattan Distance between {x} and {y}: {distance}")
     return distance
 
 def euclidean_distance(x, y):
     distance = np.sqrt(np.sum([(a - b)**2 for a, b in zip(x, y)]))
-    print(f"Euclidean Distance: {distance}")
+    print(f"Euclidean Distance between {x} and {y}: {distance}")
     return distance
 
 def n_norm(x, y, n):
     norm = np.power(np.sum([(a - b)**n for a, b in zip(x, y)]), 1/n)
-    print(f"{n}-norm L{n}: {norm}")
+    print(f"{n}-norm L{n} between {x} and {y}: {norm}")
     return norm
 
-def cherbyshev_distance(x, y):
+def chebyshev_distance(x, y):
     distance = np.max([np.abs(a - b) for a, b in zip(x, y)])
-    print(f"Cherbyshew Distance: {distance}")
+    print(f"Chebyshev Distance between {x} and {y}: {distance}")
     return distance
 
 def levenshtein_rec(x,y):
@@ -45,14 +44,14 @@ def levenshtein_rec(x,y):
 
 def levenshtein_distance(x, y):
     distance = levenshtein_rec(x, y)
-    print(f"Levenshtein Distance: {distance}")
+    print(f"Levenshtein Distance between {x} and {y}: {distance}")
     return distance
 
 def hamming_distance(x, y):
     if len(x) != len(y):
         raise ValueError("len(x) != len(y)") 
     distance = np.sum([1 for a, b in zip(x, y) if a != b])   
-    print(f"Hamming Distance: {distance}")
+    print(f"Hamming Distance between '{x}' and '{y}': {distance}")
     return distance
 
 def wup_relatedness():
@@ -81,12 +80,67 @@ def linear_regression(x, y):
     print('Equation: y = {} + {} x'.format(result[0, 0], result[1, 0]))
     return result[0, 0], result[1, 0]
 
+def regularised(x, y, sigma, lam=1):
+    # create matrix
+    matrix_x = np.empty((len(x), 2))
+    matrix_y = np.empty((len(y), 1))
+    # add a column of 1s in x matrix
+    for i in range(0, len(x)):
+        matrix_x[i][0] = 1
+        matrix_x[i][1] = x[i]
+        matrix_y[i][0] = y[i]
+
+    # get reg
+    reg = sigma ** 2
+    # get diagonal matrix
+    diagonal = np.eye(matrix_x.shape[1])
+    diagonal = reg * lam * diagonal
+
+    # use formula
+    result = np.matrix(matrix_x.T @ matrix_x + diagonal).I @ matrix_x.T @ matrix_y
+    print('fit_Wh: ')
+    print(result)
+    print('Equation: y = {} + {} x'.format(result[0, 0], result[1, 0]))
+    return result[0, 0], result[1, 0]
+
+def classification_MLE_two_class(l0, l1):
+    likelihood = 0
+    likelihood += np.sum([(-np.log(1 + np.e**i)) for i in l0])
+    likelihood += np.sum([(-np.log(1 + np.e**(-i))) for i in l1])
+    print('Log-Likelihood: {}'.format(likelihood))
+    return likelihood
+
+def weight_calculator(distance, b):
+    weight = np.e**(-distance/(2*b))
+    print(f"Weight: {weight}")
+    return weight
+
+def logits_to_probabilities(logits):
+    return [1/1+np.exp(-logit) for logit in logits]
+
 def convolute_matrices(a, b, dimensions = 1):
     factor = sum([abs(i) for i in np.array(a).flatten()])
     if dimensions == 1:
         return factor, np.convolve(a, b, mode='valid')
     elif dimensions == 2:
         return factor, convolve2d(a, b, mode='valid')
+
+def k_nearest(xs, labels, n, k):
+    distances = []
+    for x in xs:
+        distances.append(euclidean_distance(x, n))
+    #print(distances)
+    closest_indices = []
+    for _ in range(0, k):
+        x = min(distances)
+        idx = distances.index(x)
+        closest_indices.append(idx)
+        distances.pop(idx)
+    closest_labels = [labels[i] for i in closest_indices]
+    belongs_to = max(set(closest_labels), key=closest_labels.count)
+    print(f"new datapoint {n} belongs in class {belongs_to}")
+    return belongs_to
+
 
 def k_means_e_step(xs):
     sum = np.zeros_like(xs[0])
@@ -102,10 +156,8 @@ def k_means(xs, k, labels = None):
     if labels is None:
         labels = [choice(range(k)) for _ in xs]
     clusters = {i: [] for i in range(k)}
-    print(clusters)
     for i, label in enumerate(labels):
         clusters[label].append(xs[i])
-    print(clusters)
     centroids = []
     # E-Step
     for label, group in clusters.items():
@@ -122,12 +174,10 @@ def k_means(xs, k, labels = None):
         results.append(
             {"label": new_label, "x": x}
         )
-    return results
-       
+    return results, centroids
 
 
 class Tests(unittest.TestCase):
-    """
     def test_stats(self):
         mean, median, std, variance = stats([-3,2,4,6,-2,0,5])
         self.assertAlmostEqual(mean, 1.71, places=2)
@@ -144,8 +194,8 @@ class Tests(unittest.TestCase):
     def test_n_norm(self):
         self.assertAlmostEqual(n_norm([4, 5, 6], [2, -1, 3], 3), 6.3, places=1)
 
-    def test_cherbyshew_distance(self):
-        self.assertEqual(cherbyshev_distance([4, 5, 6], [2, -1, 3]), 6)
+    def test_chebyshev_distance(self):
+        self.assertEqual(chebyshev_distance([4, 5, 6], [2, -1, 3]), 6)
 
     def test_levenshtein_distance(self):
         self.assertEqual(levenshtein_distance("water", "further"), 4)
@@ -202,7 +252,19 @@ class Tests(unittest.TestCase):
         x = np.array([-2.1, -3.2])
         y = np.array([0.133, 0.3])
         self.assertAlmostEqual(euclidean_distance(x, y), 4.15, places = 2)
-    """
+
+    def test_k_mean(self):
+        xs = np.array([
+            [-2.1, -3.2],
+            [-3.4, -1.2],
+            [-2.6, -2.7],
+            [3.2, 2.1],
+            [1.2, 3.6],
+            [0.6, 0]
+        ])
+        labels = np.array([1, 0, 1, 0, 1, 0])
+        k = 2
+        pprint(k_means(xs, k, labels))
 
 if __name__ == "__main__":
     #unittest.main()
@@ -214,6 +276,8 @@ if __name__ == "__main__":
         [1.2, 3.6],
         [0.6, 0]
     ])
-    labels = np.array([1, 0, 1, 0, 1, 0])
-    k = 2
-    pprint(k_means(xs, k, labels))
+
+    labels = np.array([0,0,0,1,1,1])
+    n = [0.2, -0.3 ]
+    k = 3
+    print(k_nearest(xs, labels, n, k))
