@@ -28,9 +28,9 @@ def n_norm(x, y, n):
     print(f"{n}-norm L{n}: {norm}")
     return norm
 
-def cherbyshev_distance(x, y):
+def chebyshev_distance(x, y):
     distance = np.max([np.abs(a - b) for a, b in zip(x, y)])
-    print(f"Cherbyshew Distance: {distance}")
+    print(f"Chebyshev Distance: {distance}")
     return distance
 
 def levenshtein_rec(x,y):
@@ -144,8 +144,8 @@ class Tests(unittest.TestCase):
     def test_n_norm(self):
         self.assertAlmostEqual(n_norm([4, 5, 6], [2, -1, 3], 3), 6.3, places=1)
 
-    def test_cherbyshew_distance(self):
-        self.assertEqual(cherbyshev_distance([4, 5, 6], [2, -1, 3]), 6)
+    def test_chebyshev_distance(self):
+        self.assertEqual(chebyshev_distance([4, 5, 6], [2, -1, 3]), 6)
 
     def test_levenshtein_distance(self):
         self.assertEqual(levenshtein_distance("water", "further"), 4)
