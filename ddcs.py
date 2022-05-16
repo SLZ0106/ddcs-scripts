@@ -192,6 +192,12 @@ def k_means(xs, k, labels = None):
         )
     return results, centroids
 
+def rss(xs, ys, f):
+    # f is a function
+    res = []
+    for x, y in zip(xs, ys):
+        res.append((y-(f(x)))**2)
+    return sum(res)
 
 class Tests(unittest.TestCase):
     def test_stats(self):
