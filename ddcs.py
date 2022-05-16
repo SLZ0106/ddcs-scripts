@@ -1,4 +1,3 @@
-from nltk.corpus import wordnet as wn
 from pprint import pprint
 from scipy.signal import convolve2d
 from random import choice
