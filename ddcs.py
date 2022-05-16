@@ -297,19 +297,23 @@ class Tests(unittest.TestCase):
         k = 3
 
         self.assertEqual(k_nearest(xs, n, k, labels), 0)
+    
+    def test_weighted_nearest(self):
+        xs = np.array([
+            [-2.1, -3.2],
+            [-3.4, -1.2],
+            [-2.6, -2.7],
+            [3.2, 2.1],
+            [1.2, 3.6],
+            [0.6, 0]
+        ])
 
+        labels = np.array([0,0,0,1,1,1])
+        n = [0.2, -0.3 ]
+        b = 2
+
+        self.assertEqual(weighted_nearest(xs, labels, n, b), 1)
+        
 if __name__ == "__main__":
-    #unittest.main()
-    xs = np.array([
-        [-2.1, -3.2],
-        [-3.4, -1.2],
-        [-2.6, -2.7],
-        [3.2, 2.1],
-        [1.2, 3.6],
-        [0.6, 0]
-    ])
+    unittest.main()
 
-    labels = np.array([0,0,0,1,1,1])
-    n = [0.2, -0.3 ]
-    b = 2
-    print(weighted_nearest(xs, labels, n, b))
