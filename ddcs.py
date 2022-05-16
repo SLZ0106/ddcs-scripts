@@ -1,4 +1,3 @@
-from pprint import pprint
 from scipy.signal import convolve2d
 from random import choice
 import numpy as np
@@ -128,6 +127,7 @@ def convolute_matrices(a, b, dimensions = 1):
 def k_nearest(xs, labels, n, k):
     distances = []
     for x in xs:
+        print(x, n)
         distances.append(euclidean_distance(x, n))
     #print(distances)
     closest_indices = []
@@ -200,6 +200,7 @@ def rss(xs, ys, f):
     return sum(res)
 
 class Tests(unittest.TestCase):
+
     def test_stats(self):
         mean, median, std, variance = stats([-3,2,4,6,-2,0,5])
         self.assertAlmostEqual(mean, 1.71, places=2)
@@ -286,7 +287,7 @@ class Tests(unittest.TestCase):
         ])
         labels = np.array([1, 0, 1, 0, 1, 0])
         k = 2
-        pprint(k_means(xs, k, labels))
+        print(k_means(xs, k, labels))
 
     def test_k_nearest(self):
         xs = np.array([
@@ -301,9 +302,8 @@ class Tests(unittest.TestCase):
         labels = np.array([0,0,0,1,1,1])
         n = [0.2, -0.3 ]
         k = 3
+        self.assertEqual(k_nearest(xs, labels, n, k), 0)
 
-        self.assertEqual(k_nearest(xs, n, k, labels), 0)
-    
     def test_weighted_nearest(self):
         xs = np.array([
             [-2.1, -3.2],
@@ -319,7 +319,7 @@ class Tests(unittest.TestCase):
         b = 2
 
         self.assertEqual(weighted_nearest(xs, labels, n, b), 1)
-        
+
 if __name__ == "__main__":
     unittest.main()
 
