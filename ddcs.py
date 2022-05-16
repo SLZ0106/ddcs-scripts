@@ -125,6 +125,23 @@ def convolute_matrices(a, b, dimensions = 1):
     elif dimensions == 2:
         return factor, convolve2d(a, b, mode='valid')
 
+def k_nearest(xs, labels, n, k):
+    distances = []
+    for x in xs:
+        distances.append(euclidean_distance(x, n))
+    #print(distances)
+    closest_indices = []
+    for _ in range(0, k):
+        x = min(distances)
+        idx = distances.index(x)
+        closest_indices.append(idx)
+        distances.pop(idx)
+    closest_labels = [labels[i] for i in closest_indices]
+    belongs_to = max(set(closest_labels), key=closest_labels.count)
+    print(f"new datapoint {n} belongs in class {belongs_to}")
+    return belongs_to
+
+
 def k_means_e_step(xs):
     sum = np.zeros_like(xs[0])
     for x in xs:
@@ -250,4 +267,17 @@ class Tests(unittest.TestCase):
         pprint(k_means(xs, k, labels))
 
 if __name__ == "__main__":
-    unittest.main()
+    #unittest.main()
+    xs = np.array([
+        [-2.1, -3.2],
+        [-3.4, -1.2],
+        [-2.6, -2.7],
+        [3.2, 2.1],
+        [1.2, 3.6],
+        [0.6, 0]
+    ])
+
+    labels = np.array([0,0,0,1,1,1])
+    n = [0.2, -0.3 ]
+    k = 3
+    print(k_nearest(xs, labels, n, k))
