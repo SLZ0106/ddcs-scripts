@@ -81,6 +81,44 @@ def linear_regression(x, y):
     print('Equation: y = {} + {} x'.format(result[0, 0], result[1, 0]))
     return result[0, 0], result[1, 0]
 
+def regularised(x, y, sigma, lam=1):
+    # create matrix
+    matrix_x = np.empty((len(x), 2))
+    matrix_y = np.empty((len(y), 1))
+    # add a column of 1s in x matrix
+    for i in range(0, len(x)):
+        matrix_x[i][0] = 1
+        matrix_x[i][1] = x[i]
+        matrix_y[i][0] = y[i]
+
+    # get reg
+    reg = sigma ** 2
+    # get diagonal matrix
+    diagonal = np.eye(matrix_x.shape[1])
+    diagonal = reg * lam * diagonal
+
+    # use formula
+    result = np.matrix(matrix_x.T @ matrix_x + diagonal).I @ matrix_x.T @ matrix_y
+    print('fit_Wh: ')
+    print(result)
+    print('Equation: y = {} + {} x'.format(result[0, 0], result[1, 0]))
+    return result[0, 0], result[1, 0]
+
+def classification_MLE_two_class(l0, l1):
+    likelihood = 0
+    likelihood += np.sum([(-np.log(1 + np.e**i)) for i in l0])
+    likelihood += np.sum([(-np.log(1 + np.e**(-i))) for i in l1])
+    print('Log-Likelihood: {}'.format(likelihood))
+    return likelihood
+
+def weight_calculator(distance, b):
+    weight = np.e**(-distance/(2*b))
+    print('Weight: {}'.format(weight))
+    return weight
+
+def logits_to_probabilities(logits):
+    return [1/1+np.exp(-logit) for logit in logits]
+
 def convolute_matrices(a, b, dimensions = 1):
     factor = sum([abs(i) for i in np.array(a).flatten()])
     if dimensions == 1:
